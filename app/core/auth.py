@@ -5,7 +5,7 @@ from typing import Any
 
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext  # type: ignore[import-untyped]
+from passlib.context import CryptContext
 
 from app.core.config import settings
 
@@ -23,7 +23,7 @@ def get_password_hash(password: str) -> str:
     # silent truncation and align with unit tests that expect a ValueError.
     if len(password.encode("utf-8")) > 72:
         raise ValueError("Password must not exceed 72 bytes when UTF-8 encoded.")
-    return str(pwd_context.hash(password))
+    return pwd_context.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -32,7 +32,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     # truncated passwords as valid.
     if len(plain_password.encode("utf-8")) > 72:
         raise ValueError("Password must not exceed 72 bytes when UTF-8 encoded.")
-    return bool(pwd_context.verify(plain_password, hashed_password))
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
