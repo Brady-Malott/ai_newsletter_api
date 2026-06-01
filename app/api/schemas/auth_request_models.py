@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
+from app.strings import get_message
+
 
 def _validate_password_length(password: str) -> str:
     """Validate that password does not exceed 72 bytes when UTF-8 encoded.
@@ -12,7 +14,7 @@ def _validate_password_length(password: str) -> str:
     with multi-byte UTF-8 characters.
     """
     if len(password.encode("utf-8")) > 72:
-        raise ValueError("Password must not exceed 50 characters")
+        raise ValueError(get_message("auth.password_too_long", max_length=50))
     return password
 
 
@@ -41,7 +43,7 @@ class RegisterUserRequest(BaseModel):
     @model_validator(mode="after")
     def passwords_match(self) -> RegisterUserRequest:
         if self.password != self.confirm_password:
-            raise ValueError("Password and confirm password do not match")
+            raise ValueError(get_message("auth.passwords_mismatch"))
         return self
 
 

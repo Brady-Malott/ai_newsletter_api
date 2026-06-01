@@ -8,6 +8,7 @@ from app.api.dependencies.unit_of_work import UnitOfWork, get_uow
 from app.core.auth import oauth2_scheme, verify_token
 from app.core.errors import build_http_error
 from app.db.models.user import User
+from app.strings import get_error_code, get_message
 
 
 async def get_current_user(
@@ -16,8 +17,8 @@ async def get_current_user(
     """FastAPI dependency to get the current authenticated user."""
     credentials_exception = build_http_error(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        error="unauthorized",
-        message="Could not validate credentials",
+        error=get_error_code("auth.unauthorized"),
+        message=get_message("auth.unauthorized"),
         headers={"WWW-Authenticate": "Bearer"},
     )
 

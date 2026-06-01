@@ -181,7 +181,7 @@ async def test_extract_interests_llm_service_error(
     token = AccessTokenResponse.model_validate(login_response.json()).access_token
     headers = {"Authorization": f"Bearer {token}"}
 
-    error = LLMUnavailableError("LLM service unavailable")
+    error = LLMUnavailableError()
     async_app.dependency_overrides[get_uow] = uow_llm_client_override(ErrorLLMClient(error))
     try:
         request_payload = InterestExtractionRequest(prompt="test").model_dump()
@@ -217,7 +217,7 @@ async def test_extract_interests_llm_authentication_error(
     token = AccessTokenResponse.model_validate(login_response.json()).access_token
     headers = {"Authorization": f"Bearer {token}"}
 
-    error = LLMAuthenticationError("LLM authentication failed")
+    error = LLMAuthenticationError()
     async_app.dependency_overrides[get_uow] = uow_llm_client_override(ErrorLLMClient(error))
     try:
         request_payload = InterestExtractionRequest(prompt="test").model_dump()
@@ -229,7 +229,7 @@ async def test_extract_interests_llm_authentication_error(
         assert response.status_code == status.HTTP_502_BAD_GATEWAY
         payload = response.json()
         assert payload["error"] == "llm_auth_failed"
-        assert "authentication" in payload["message"].lower()
+        assert "service" in payload["message"].lower() or "try again" in payload["message"].lower()
     finally:
         async_app.dependency_overrides.pop(get_uow, None)
 
@@ -253,7 +253,7 @@ async def test_extract_interests_llm_invalid_response_error(
     token = AccessTokenResponse.model_validate(login_response.json()).access_token
     headers = {"Authorization": f"Bearer {token}"}
 
-    error = LLMInvalidResponseError("LLM returned invalid JSON.")
+    error = LLMInvalidResponseError()
     async_app.dependency_overrides[get_uow] = uow_llm_client_override(ErrorLLMClient(error))
     try:
         request_payload = InterestExtractionRequest(prompt="test").model_dump()
@@ -265,7 +265,7 @@ async def test_extract_interests_llm_invalid_response_error(
         assert response.status_code == status.HTTP_502_BAD_GATEWAY
         payload = response.json()
         assert payload["error"] == "llm_response_invalid"
-        assert "invalid" in payload["message"].lower()
+        assert "process" in payload["message"].lower() or "try again" in payload["message"].lower()
     finally:
         async_app.dependency_overrides.pop(get_uow, None)
 

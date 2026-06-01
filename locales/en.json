@@ -1,0 +1,29 @@
+{
+  "auth": {
+    "user_exists": "Email already registered",
+    "invalid_credentials": "Incorrect email or password",
+    "password_too_long": "Password must not exceed {max_length} characters",
+    "unauthorized": "Could not validate credentials",
+    "passwords_mismatch": "Password and confirm password do not match",
+    "password_max_length": "Password must not exceed {max_length} characters"
+  },
+  "validation": {
+    "request_validation_failed": "Request validation failed"
+  },
+  "http": {
+    "too_many_requests": "Too many requests",
+    "internal_server_error": "Internal Server Error"
+  },
+  "interests": {
+    "llm_unavailable": "LLM service is temporarily unavailable. Try again shortly.",
+    "llm_auth_failed": "Service error. Please try again later.",
+    "llm_response_invalid": "Could not process your request. Please try again.",
+    "invalid_prompt": "Your input could not be processed."
+  },
+  "prompt": {
+    "unsupported_control_chars": "Prompt contains unsupported control characters.",
+    "no_urls": "Prompt must not include URLs.",
+    "empty_after_sanitization": "Prompt must include valid text after sanitization.",
+    "disallowed_instructions": "Prompt contains disallowed instruction patterns."
+  }
+}
