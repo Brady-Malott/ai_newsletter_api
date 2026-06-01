@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import get_password_hash, verify_password
 from app.db.models.user import User
+from app.strings import get_message
 
 
 def auth_service_factory_provider() -> Callable[[AsyncSession], AuthService]:
@@ -24,32 +25,30 @@ def auth_service_factory_provider() -> Callable[[AsyncSession], AuthService]:
 class AuthenticationError(Exception):
     """Base error for authentication-related failures."""
 
-    def __init__(self, message: str, error_code: str) -> None:
-        super().__init__(message)
+    def __init__(self, error_code: str) -> None:
+        super().__init__(get_message(f"auth.{error_code}"))
         self.error_code = error_code
 
 
 class UserAlreadyExistsError(AuthenticationError):
     """Raised when attempting to register a user that already exists."""
 
-    def __init__(self, message: str = "Email already registered") -> None:
-        super().__init__(message, "user_exists")
+    def __init__(self) -> None:
+        super().__init__("user_exists")
 
 
 class InvalidCredentialsError(AuthenticationError):
     """Raised when login credentials are invalid."""
 
-    def __init__(self, message: str = "Incorrect email or password") -> None:
-        super().__init__(message, "invalid_credentials")
+    def __init__(self) -> None:
+        super().__init__("invalid_credentials")
 
 
 class PasswordTooLongError(AuthenticationError):
     """Raised when password exceeds the maximum allowed length (72 bytes)."""
 
-    def __init__(
-        self, message: str = "Password must not exceed 72 bytes when UTF-8 encoded"
-    ) -> None:
-        super().__init__(message, "password_too_long")
+    def __init__(self) -> None:
+        super().__init__("password_too_long")
 
 
 class AuthService:
@@ -76,14 +75,12 @@ class AuthService:
         existing_user = result.scalar_one_or_none()
 
         if existing_user:
-            raise UserAlreadyExistsError("Email already registered")
+            raise UserAlreadyExistsError()
 
         try:
             hashed_password = get_password_hash(password)
         except ValueError as e:
-            raise PasswordTooLongError(
-                "Password must not exceed 72 bytes when UTF-8 encoded"
-            ) from e
+            raise PasswordTooLongError() from e
 
         try:
             result = await self._session.execute(
@@ -98,7 +95,7 @@ class AuthService:
                 or "23505" in str(e.orig)
                 or "ix_users_email" in error_str
             ):
-                raise UserAlreadyExistsError("Email already registered") from e
+                raise UserAlreadyExistsError() from e
             raise
 
         return new_user
@@ -121,17 +118,15 @@ class AuthService:
         user = result.scalar_one_or_none()
 
         if user is None:
-            raise InvalidCredentialsError("Incorrect email or password")
+            raise InvalidCredentialsError()
 
         try:
             password_valid = verify_password(password, user.hashed_password)
         except ValueError as e:
-            raise PasswordTooLongError(
-                "Password must not exceed 72 bytes when UTF-8 encoded"
-            ) from e
+            raise PasswordTooLongError() from e
 
         if not password_valid:
-            raise InvalidCredentialsError("Incorrect email or password")
+            raise InvalidCredentialsError()
 
         return user
 

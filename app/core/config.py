@@ -80,6 +80,10 @@ class Settings(BaseSettings):
     environment: str = "local"
     log_level: str = "INFO"
     jwt_algorithm: str = "HS256"
+    locale: str = Field(
+        default="en",
+        description="Default locale for user-facing strings (e.g. en, es)",
+    )
 
     @staticmethod
     def _is_strong_jwt_secret(secret: str) -> bool:

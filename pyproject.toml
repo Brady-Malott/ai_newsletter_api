@@ -98,5 +98,5 @@ typeCheckingMode = "strict"
 reportMissingTypeStubs = true
 venvPath = "."
 venv = ".venv"
-exclude = ["**/.venv", "**/site-packages", "**/alembic/versions"]
+exclude = ["**/.venv", "**/site-packages", "**/alembic/versions", "**/node_modules", "**/__pycache__", "**/.*"]
 include = ["app/**/*.py", "tests/**/*.py", "alembic/**/*.py"]

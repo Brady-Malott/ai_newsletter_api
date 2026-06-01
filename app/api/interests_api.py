@@ -14,6 +14,7 @@ from app.core.rate_limit import (
 )
 from app.db.models.user import User
 from app.services.interest_service import InterestExtractionError
+from app.strings import get_message_for_error
 
 router = APIRouter()
 
@@ -46,18 +47,20 @@ async def extract_interests(
             remove_interests=result.remove_interests,
         )
     except PromptValidationError as exc:
+        error_code, message = get_message_for_error(exc)
         raise build_http_error(
             status_code=status.HTTP_400_BAD_REQUEST,
-            error=exc.error_code,
-            message=str(exc),
+            error=error_code,
+            message=message,
         ) from exc
     except InterestExtractionError as exc:
         if exc.error_code in ("llm_auth_failed", "llm_response_invalid"):
             status_code = status.HTTP_502_BAD_GATEWAY
         else:
             status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        error_code, message = get_message_for_error(exc)
         raise build_http_error(
             status_code=status_code,
-            error=exc.error_code,
-            message=str(exc),
+            error=error_code,
+            message=message,
         ) from exc

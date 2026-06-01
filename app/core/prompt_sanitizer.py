@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 import re
 
+from app.strings import get_message
+
 logger = logging.getLogger(__name__)
 
 _CODE_BLOCK_PATTERN = re.compile(r"```.*?```", re.DOTALL)
@@ -22,23 +24,27 @@ class PromptValidationError(ValueError):
 
     error_code: str = "invalid_prompt"
 
+    def __init__(self, reason: str) -> None:
+        self.message_key = f"prompt.{reason}"
+        super().__init__(get_message(self.message_key))
+
 
 def sanitize_prompt(prompt: str) -> str:
     """Sanitize prompt input and return safe text for LLM usage."""
     if _CONTROL_CHARS_PATTERN.search(prompt):
-        raise PromptValidationError("Prompt contains unsupported control characters.")
+        raise PromptValidationError("unsupported_control_chars")
     if _URL_PATTERN.search(prompt):
-        raise PromptValidationError("Prompt must not include URLs.")
+        raise PromptValidationError("no_urls")
     sanitized = _CODE_BLOCK_PATTERN.sub(" ", prompt)
     sanitized = _INLINE_CODE_PATTERN.sub(" ", sanitized)
     sanitized = " ".join(sanitized.split())
 
     if not sanitized:
-        raise PromptValidationError("Prompt must include valid text after sanitization.")
+        raise PromptValidationError("empty_after_sanitization")
 
     for pattern in _INJECTION_PATTERNS:
         if pattern.search(sanitized):
-            raise PromptValidationError("Prompt contains disallowed instruction patterns.")
+            raise PromptValidationError("disallowed_instructions")
 
     if sanitized != prompt:
         logger.info(

@@ -26,6 +26,7 @@ from app.services.auth_service import (
     PasswordTooLongError,
     UserAlreadyExistsError,
 )
+from app.strings import get_message_for_error
 
 router = APIRouter()
 
@@ -57,10 +58,11 @@ async def register(
             status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
         else:
             status_code = status.HTTP_400_BAD_REQUEST
+        error_code, message = get_message_for_error(e)
         raise build_http_error(
             status_code=status_code,
-            error=e.error_code,
-            message=str(e),
+            error=error_code,
+            message=message,
         ) from e
 
 
@@ -92,10 +94,11 @@ async def login(
         headers = (
             {"WWW-Authenticate": "Bearer"} if status_code == status.HTTP_401_UNAUTHORIZED else None
         )
+        error_code, message = get_message_for_error(e)
         raise build_http_error(
             status_code=status_code,
-            error=e.error_code,
-            message=str(e),
+            error=error_code,
+            message=message,
             headers=headers,
         ) from e
 

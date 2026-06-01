@@ -11,6 +11,8 @@ from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
 
+from app.strings import get_message
+
 ERROR_CODE_BY_STATUS: dict[int, str] = {
     400: "bad_request",
     401: "unauthorized",
@@ -63,7 +65,7 @@ def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     if not isinstance(exc, StarletteHTTPException):
         payload = ErrorResponse(
             error=_map_status_to_error(HTTP_500_INTERNAL_SERVER_ERROR),
-            message=_status_phrase(HTTP_500_INTERNAL_SERVER_ERROR),
+            message=get_message("http.internal_server_error"),
         ).model_dump(exclude_none=True)
         return JSONResponse(status_code=HTTP_500_INTERNAL_SERVER_ERROR, content=payload)
     detail = exc.detail
@@ -85,7 +87,7 @@ def unhandled_exception_handler(request: Request, exc: Exception) -> JSONRespons
     logging.exception("Unhandled exception", exc_info=exc)
     payload = ErrorResponse(
         error=_map_status_to_error(HTTP_500_INTERNAL_SERVER_ERROR),
-        message=_status_phrase(HTTP_500_INTERNAL_SERVER_ERROR),
+        message=get_message("http.internal_server_error"),
     ).model_dump(exclude_none=True)
     return JSONResponse(status_code=HTTP_500_INTERNAL_SERVER_ERROR, content=payload)
 
@@ -94,13 +96,13 @@ def request_validation_exception_handler(request: Request, exc: Exception) -> JS
     if not isinstance(exc, RequestValidationError):
         payload = ErrorResponse(
             error=_map_status_to_error(HTTP_500_INTERNAL_SERVER_ERROR),
-            message=_status_phrase(HTTP_500_INTERNAL_SERVER_ERROR),
+            message=get_message("http.internal_server_error"),
         ).model_dump(exclude_none=True)
         return JSONResponse(status_code=HTTP_500_INTERNAL_SERVER_ERROR, content=payload)
 
     payload = ErrorResponse(
         error=_map_status_to_error(422),
-        message="Request validation failed",
+        message=get_message("validation.request_validation_failed"),
         details=exc.errors(),
     ).model_dump(exclude_none=True)
     return JSONResponse(status_code=422, content=payload)
@@ -109,6 +111,6 @@ def request_validation_exception_handler(request: Request, exc: Exception) -> JS
 def rate_limit_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     payload = ErrorResponse(
         error=_map_status_to_error(429),
-        message="Too many requests",
+        message=get_message("http.too_many_requests"),
     ).model_dump(exclude_none=True)
     return JSONResponse(status_code=429, content=payload, headers=getattr(exc, "headers", None))

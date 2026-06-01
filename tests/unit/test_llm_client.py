@@ -133,7 +133,7 @@ async def test_extract_interests_empty_response(
     mock_openai_client.chat.completions.create = AsyncMock(return_value=mock_response)
 
     # Act
-    with pytest.raises(LLMInvalidResponseError, match="Empty response from OpenAI") as exc_info:
+    with pytest.raises(LLMInvalidResponseError, match=r"process|try again") as exc_info:
         await llm_client.extract_interests("test prompt")
 
     # Assert

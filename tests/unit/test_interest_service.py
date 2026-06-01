@@ -135,7 +135,7 @@ class ErrorLLMClient(LLMClient):
 async def test_extract_interests_raises_interest_extraction_error_on_llm_unavailable() -> None:
     """Service translates LLMUnavailableError to InterestExtractionError."""
     # Arrange
-    mock_client = ErrorLLMClient(LLMUnavailableError("Service unavailable"))
+    mock_client = ErrorLLMClient(LLMUnavailableError())
     mock_session = _mock_session()
     service = InterestService(session=mock_session, llm_client=mock_client)
 
@@ -150,7 +150,7 @@ async def test_extract_interests_raises_interest_extraction_error_on_llm_unavail
 async def test_extract_interests_raises_interest_extraction_error_on_llm_auth_failed() -> None:
     """Service translates LLMAuthenticationError to InterestExtractionError."""
     # Arrange
-    mock_client = ErrorLLMClient(LLMAuthenticationError("Auth failed"))
+    mock_client = ErrorLLMClient(LLMAuthenticationError())
     mock_session = _mock_session()
     service = InterestService(session=mock_session, llm_client=mock_client)
 
@@ -164,7 +164,7 @@ async def test_extract_interests_raises_interest_extraction_error_on_llm_auth_fa
 async def test_extract_interests_raises_interest_extraction_error_on_llm_invalid_response() -> None:
     """Service translates LLMInvalidResponseError to InterestExtractionError."""
     # Arrange
-    mock_client = ErrorLLMClient(LLMInvalidResponseError("Invalid JSON"))
+    mock_client = ErrorLLMClient(LLMInvalidResponseError())
     mock_session = _mock_session()
     service = InterestService(session=mock_session, llm_client=mock_client)
 

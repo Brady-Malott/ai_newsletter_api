@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.llm.client import LLMClient, LLMServiceError
 from app.llm.schemas import InterestExtractionResult
+from app.strings import get_message
 
 
 def interest_service_factory_provider(
@@ -24,8 +25,8 @@ def interest_service_factory_provider(
 class InterestExtractionError(Exception):
     """Base error for interest extraction failures."""
 
-    def __init__(self, message: str, error_code: str) -> None:
-        super().__init__(message)
+    def __init__(self, error_code: str) -> None:
+        super().__init__(get_message(f"interests.{error_code}"))
         self.error_code = error_code
 
 
@@ -48,4 +49,4 @@ class InterestService:
         try:
             return await self._llm_client.extract_interests(prompt)
         except LLMServiceError as exc:
-            raise InterestExtractionError(str(exc), exc.error_code) from exc
+            raise InterestExtractionError(exc.error_code) from exc
